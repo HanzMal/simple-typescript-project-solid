@@ -1,0 +1,1 @@
+Gunakan enum untuk nilai yang sudah pasti pilihannya

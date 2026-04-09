@@ -1,0 +1,13 @@
+# Mengabaikan folder dependencies
+node_modules/
+
+# Mengabaikan hasil build/compile
+dist/
+
+# (Opsional) Mengabaikan log error
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# (Opsional) Mengabaikan file environment sensitif
+.env

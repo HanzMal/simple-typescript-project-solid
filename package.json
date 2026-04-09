@@ -1,0 +1,27 @@
+{
+  "name": "simple-typescript-project-solid",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+        "start": "node dist/index.js",
+        "build": "tsc",
+        "dev": "concurrently \"tsc -w\" \"nodemon dist/index.js\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HanzMal/simple-typescript-project-solid.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/HanzMal/simple-typescript-project-solid/issues"
+  },
+  "homepage": "https://github.com/HanzMal/simple-typescript-project-solid#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.14"
+  }
+}

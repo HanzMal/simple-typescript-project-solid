@@ -20,9 +20,13 @@ interface ITask {
     kindTask: KindTask
 }
 
+type NIP = string | number
+type Coordinates = [number, number]
+
 interface Employee {
-    nip: number,
+    nip: NIP,
     name: string,
+    location: Coordinates
 }
 
 interface ITaskRepository {
@@ -111,6 +115,7 @@ export class TaskService {
 
 export class TaskFinder {
     // menggunakan Generic <K> yang merupakan key dari ITask
+    // generic constraint extends keyof ambil nilai dari objek berdasarkan kunci valid
     static searchByProperty <K extends keyof ITask>(
         tasks: ITask[],
         property: K,

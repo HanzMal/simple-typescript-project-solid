@@ -1,3 +1,5 @@
+import Database from 'better-sqlite3';
+
 // Definisi status task dengan Enum
 export enum TaskStatus {
     Todo = "TODO",
@@ -11,7 +13,7 @@ enum KindTask {
     Frontend = "FRONTEND"
 }
 
-interface ITask {
+export interface ITask {
     id: string,
     title: string,
     desc: string,
@@ -29,19 +31,25 @@ interface Employee {
     location: Coordinates
 }
 
-interface ITaskRepository {
-    save(task: ITask): void
-    findById(id: string): ITask | undefined
-    findAll(): ITask[]
+interface ITaskRepository<T extends ITask> {
+    save(task: T): void
+    findById(id: string): T | undefined
+    findAll(): T[]
     delete(id: string): void
 }
 
-export class InMemoryTaskRepository implements ITaskRepository {
-    private tasks: ITask[] = []
+export interface IPrioritizedTask extends ITask {
+    urgency: number;
+    importance: number;
+    priorityScore: number;
+}
 
-    save(task: ITask): void {
+export class InMemoryTaskRepository<T extends ITask> implements ITaskRepository<T> {
+    private tasks: T[] = []
+
+    save(task: T): void {
         const index = this.tasks.findIndex(t => t.id === task.id)
-        if (index !== -1) {
+        if (index > 0) {
             this.tasks[index] = task
         } else {
             this.tasks.push(task)
@@ -49,11 +57,11 @@ export class InMemoryTaskRepository implements ITaskRepository {
 
     }
 
-    findById(id: string): ITask | undefined {
+    findById(id: string): T | undefined {
         return this.tasks.find(t => t.id === id)
     }
 
-    findAll(): ITask[] {
+    findAll(): T[] {
         return [...this.tasks]
     }
 
@@ -63,22 +71,105 @@ export class InMemoryTaskRepository implements ITaskRepository {
 
 }
 
+export class SQLiteTaskRepository implements ITaskRepository<IPrioritizedTask> {
+    readonly db: Database.Database;
+
+    constructor() {
+        // Membuka database (otomatis membuat file jika belum ada)
+        this.db = new Database('./task_manager.sqlite');
+        this.init();
+    }
+
+    private init() {
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS tasks (
+                id TEXT PRIMARY KEY,
+                title TEXT NOT NULL,
+                desc TEXT,
+                status TEXT,
+                urgency INTEGER,
+                importance INTEGER,
+                priorityScore REAL,
+                createdAt TEXT
+            )
+        `);
+    }
+
+    save(task: IPrioritizedTask): void {
+        const stmt = this.db.prepare(`
+            INSERT OR REPLACE INTO tasks 
+            (id, title, desc, status, urgency, importance, priorityScore, createdAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+
+        stmt.run(
+            task.id,
+            task.title,
+            task.desc,
+            task.status,
+            task.urgency,
+            task.importance,
+            task.priorityScore,
+            task.createdAt.toISOString()
+        );
+    }
+
+    findAll(): IPrioritizedTask[] {
+        const stmt = this.db.prepare(`SELECT * FROM tasks ORDER BY priorityScore DESC`);
+        const rows = stmt.all() as any[];
+
+        return rows.map(row => ({
+            ...row,
+            createdAt: new Date(row.createdAt)
+        }));
+    }
+
+    findById(id: string): IPrioritizedTask | undefined {
+        const stmt = this.db.prepare(`SELECT * FROM tasks WHERE id = ?`);
+        const row = stmt.get(id) as any;
+
+        if (!row) return undefined;
+
+        return {
+            ...row,
+            createdAt: new Date(row.createdAt) // Mengubah string kembali ke objek Date
+        };
+    }
+
+    delete(id: string): void {
+        const stmt = this.db.prepare(`DELETE FROM tasks WHERE id = ?`);
+        stmt.run(id);
+    }
+}
+
 export class TaskService {
     // inject repository ke dalam service (dependency injection)
-    constructor(private taskRepository: ITaskRepository) {}
+    constructor(private readonly taskRepository: ITaskRepository<IPrioritizedTask>) {}
 
-    createTask(title:string, desc: string):ITask {
+    private calculatePriority(urgency: number, importance: number): number {
+        const weightU = 0.7; // Urgency lebih diutamakan
+        const weightI = 0.3;
+        // Rumus: Skor = (U * 0.7) + (I * 0.3)
+        return Number.parseFloat(((urgency * weightU) + (importance * weightI)).toFixed(2));
+    }
+
+    createTask(title: string, desc: string, urgency: number, importance: number):IPrioritizedTask {
         if (title.length < 1) {
             throw new Error("Title must more than 1 word");
         }
 
-        const newTask: ITask = {
+        const score = this.calculatePriority(urgency, importance);
+
+        const newTask: IPrioritizedTask = {
             id: Math.random().toString(36).substring(2,9),
             title: title,
             desc: desc,
             status: TaskStatus.Todo,
             createdAt: new Date(),
-            kindTask: KindTask.Frontend
+            kindTask: KindTask.Frontend,
+            urgency,
+            importance,
+            priorityScore: score
         }
 
         this.taskRepository.save(newTask)
@@ -96,7 +187,7 @@ export class TaskService {
 
     codeReviewTask(id: string) {
         const task = this.taskRepository.findById(id)
-        if (!task || task.status !== TaskStatus.InProgress) {
+        if (task?.status !== TaskStatus.InProgress) {
             throw new Error("Task not found 2");
         }
         task.status = TaskStatus.CodeReview
@@ -109,6 +200,10 @@ export class TaskService {
 
     deleteTask(id: string) {
         this.taskRepository.delete(id)
+    }
+
+    getSortedTasks(): IPrioritizedTask[] {
+        return this.taskRepository.findAll().sort((a, b) => b.priorityScore - a.priorityScore);
     }
 
 }

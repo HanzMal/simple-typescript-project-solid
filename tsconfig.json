@@ -10,7 +10,7 @@
       "module": "nodenext",
       "moduleResolution": "nodenext",
       "target": "es6",
-      "types": [],
+      "types": ["node", "better-sqlite3"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

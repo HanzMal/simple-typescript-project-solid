@@ -65,8 +65,3 @@ simple-typescript-project-solid/
 ├── tsconfig.json
 └── task_manager.sqlite   # Database file
 ```
-
-1. **Install Dependencies:** `npm install`
-2. **Build & Run:** `make`
-3. **Run Only:** `make run`
-4. **Clean Build:** `make clean`

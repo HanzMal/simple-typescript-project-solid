@@ -1,28 +1,29 @@
 import type { IPrioritizedTask } from "../interfaces/IPrioritizedTask.js";
 import type { ITask } from "../interfaces/ITask.js";
 import type { ITaskRepository } from "../interfaces/ITaskRepository.js";
+import type { ITaskService } from "../interfaces/ITaskService.js";
 import { KindTask, TaskStatus } from "../types.js";
+import { TaskNotFoundException } from "./TaskNotFoundException.js";
 
-export class TaskService {
+export class TaskService implements ITaskService {
     // inject repository ke dalam service (dependency injection)
     constructor(private readonly taskRepository: ITaskRepository<IPrioritizedTask>) { }
 
     private calculatePriority(urgency: number, importance: number): number {
-        const weightU = 0.7; // Urgency lebih diutamakan
+        const weightU = 0.7;
         const weightI = 0.3;
-        // Rumus: Skor = (U * 0.7) + (I * 0.3)
         return Number.parseFloat(((urgency * weightU) + (importance * weightI)).toFixed(2));
     }
 
     createTask(title: string, desc: string, urgency: number, importance: number): IPrioritizedTask {
         if (title.length < 1) {
-            throw new Error("Title must more than 1 word");
+            throw new TaskNotFoundException("Title must more than 1 word");
         }
 
         const score = this.calculatePriority(urgency, importance);
 
         const randomNumber = Math.floor(Math.random() * 900) + 10;
-        const customId = `TASK-${randomNumber}`;
+        const customId = `${randomNumber}`;
 
         const newTask: IPrioritizedTask = {
             id: customId,
@@ -40,36 +41,18 @@ export class TaskService {
         return newTask
     }
 
-    inProgressTask(id: string) {
-        const task = this.taskRepository.findById(id)
-        if (!task) {
-            throw new Error("Task not found 1");
-        }
-        task.status = TaskStatus.InProgress
-        this.taskRepository.save(task)
-    }
-
-    codeReviewTask(id: string) {
-        const task = this.taskRepository.findById(id)
-        if (task?.status !== TaskStatus.InProgress) {
-            throw new Error("Task not found 2");
-        }
-        task.status = TaskStatus.CodeReview
-        this.taskRepository.save(task)
-    }
-
     changeStatusTask(id: string) {
         const task = this.taskRepository.findById(id)
         if (!task) {
-            throw new Error("Task not found 1");
+            throw new TaskNotFoundException(`Task with ID ${id} is not found`);
         }
         if (task.status === TaskStatus.Todo) {
             task.status = TaskStatus.InProgress
-            this.taskRepository.save(task)
         } else if (task.status === TaskStatus.InProgress) {
             task.status = TaskStatus.CodeReview
-            this.taskRepository.save(task)
         }
+        this.taskRepository.save(task)
+        return task
     }
 
     getAllTask(): ITask[] {

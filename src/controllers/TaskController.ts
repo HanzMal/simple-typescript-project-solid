@@ -6,10 +6,12 @@ export class TaskController {
     async showAllTasks() {
         const tasks = this.taskService.getSortedTasks();
         console.table(tasks.map(t => ({
-            ID: t.id,
+            "Task ID": `TASK-${t.id}`,
             Title: t.title,
+            Description: t.desc,
             Score: t.priorityScore,
-            Status: t.status
+            Status: t.status,
+            Created: t.createdAt
         })));
     }
 
@@ -19,7 +21,12 @@ export class TaskController {
     }
     
     async updateStatusTask(id: string) {
-        this.taskService.changeStatusTask(id)
+        try {
+            const updatedTask = this.taskService.changeStatusTask(id)
+            console.log(`Success: TASK-${updatedTask.id} has changed status to ${updatedTask.status}`)
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     async deleteTaskById(id: string) {

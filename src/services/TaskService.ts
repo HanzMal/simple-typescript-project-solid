@@ -1,9 +1,9 @@
+import { TaskNotFoundException } from "../exception/TaskNotFoundException.js";
 import type { IPrioritizedTask } from "../interfaces/IPrioritizedTask.js";
 import type { ITask } from "../interfaces/ITask.js";
 import type { ITaskRepository } from "../interfaces/ITaskRepository.js";
 import type { ITaskService } from "../interfaces/ITaskService.js";
 import { KindTask, TaskStatus } from "../types.js";
-import { TaskNotFoundException } from "./TaskNotFoundException.js";
 
 export class TaskService implements ITaskService {
     // inject repository ke dalam service (dependency injection)

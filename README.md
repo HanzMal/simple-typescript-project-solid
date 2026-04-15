@@ -29,6 +29,34 @@ make build
 make run
 ```
 
+## Choose Menu
+
+### 1. View All Task
+
+Menampilkan semua record data dalam table
+
+### 2. Add Task
+
+- Input judul
+- Input Deskripsi
+- Input Urgency dalam range (1-10)
+- Input Importance dalam range (1-10)
+- Input Importance dalam range (1-10)
+
+### 3. Update Status Task
+
+- Display all record data in table
+- Input ID number. example with TASK-439, So please input just number 439
+
+### 4. Delete Task
+
+- Display all record data in table
+- Input ID number from task you want to delete. example with TASK-439, So please input just number 439
+
+### 5. Out
+
+You can get out from the CLI Application
+
 ## 📋 Available Commands
 
 | Command             | Description                        |

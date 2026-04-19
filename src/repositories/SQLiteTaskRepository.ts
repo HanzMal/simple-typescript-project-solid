@@ -1,13 +1,14 @@
 import Database from "better-sqlite3";
 import type { IPrioritizedTask } from '../interfaces/IPrioritizedTask.js';
 import type { ITaskRepository } from "../interfaces/ITaskRepository.js";
+import db from "../database.js";
 
 export class SQLiteTaskRepository implements ITaskRepository<IPrioritizedTask> {
     readonly db: Database.Database;
 
     constructor() {
         // Membuka database (otomatis membuat file jika belum ada)
-        this.db = new Database('./task_manager.sqlite');
+        this.db = db
         this.init();
     }
 

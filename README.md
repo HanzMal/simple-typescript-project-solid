@@ -29,6 +29,10 @@ make build
 make run
 ```
 
+## Input Username
+
+Anda harus memasukkan username. Jika belum terdaftar maka sistem akan melakukan pendaftaran. Jika sudah terdaftar anda bisa langsung masuk ke menu. Username yang dimasukkan yaitu berupa alphabet dan minimum panjangnya adalah 5 huruf.
+
 ## Choose Menu
 
 ### 1. View All Task

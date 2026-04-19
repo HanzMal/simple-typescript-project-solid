@@ -9,7 +9,7 @@ export class TaskController {
             "Task ID": `TASK-${t.id}`,
             Title: t.title,
             Description: t.desc,
-            Score: t.priorityScore,
+            UrgencyImportance: t.priorityScore,
             Status: t.status,
             Created: t.createdAt
         })));

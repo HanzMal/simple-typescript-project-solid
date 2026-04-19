@@ -39,6 +39,7 @@ run:
 clean:
 	@echo "🧹 Cleaning up dist folder..."
 	rm -rf dist
+	rm -rf logs
 
 ## Build and run program
 start: build run
